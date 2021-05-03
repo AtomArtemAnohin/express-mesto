@@ -13,8 +13,14 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.status(200).send(card))
-    .catch((err) => res.status(500).send(err));
+
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Введенные данные некорректны' });
+      }
+      return res.status(500).send(err));
 };
+
 
 //  Удалить карточку
 const deleteCard = (req, res) => {
