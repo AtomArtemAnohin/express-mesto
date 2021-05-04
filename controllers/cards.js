@@ -18,9 +18,9 @@ const createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Введенные данные некорректны' });
       }
-      return res.status(500).send(err));
+      return res.status(500).send(err);
+    });
 };
-
 
 //  Удалить карточку
 const deleteCard = (req, res) => {
@@ -44,7 +44,7 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     {
       new: true,
-      runValidators: true
+      runValidators: true,
     })
     .then((card) => {
       if (!card) {
@@ -65,7 +65,7 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     {
       new: true,
-      runValidators: true
+      runValidators: true,
     })
     .then((card) => {
       if (!card) {
