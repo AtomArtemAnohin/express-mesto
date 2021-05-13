@@ -1,11 +1,13 @@
 const express = require('express');
+const { celebrate, Joi, errors } = require('celebrate');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
+const { validateSignUp, validateSignIn } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
-const { errors } = require('celebrate');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,21 +23,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email(),
-    password: Joi.string().required().min(8),
-  })
-}), login);
-app.post('/signup', createUser);
+app.post('/signin', validateSignIn, login); // вторым аргументом передаем middleware для валидации приходящих данных до обращения к бд
+app.post('/signup', validateSignUp, createUser);
 
 app.use(auth);
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
 app.use('*', () => {
-  throw new NotFoundError("Такой страницы не существует");
-})
+  throw new NotFoundError('Такой страницы не существует');
+});
 app.use(errors());
 
 app.use((err, req, res, next) => {
